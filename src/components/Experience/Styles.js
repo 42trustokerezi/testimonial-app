@@ -45,7 +45,10 @@ export const Image = styled.div`
 `
 
 export const Img = styled.img`
-   
+   @media screen and (min-width: 320px) and (max-width: 720px){
+        width: 20rem;
+        height: 20rem;
+    }
 `
 
 export const Button = styled.div`

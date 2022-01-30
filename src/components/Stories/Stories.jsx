@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import storage from '../../firebase'
 import { GlobalStyle, 
         StyledFormWrapper, 
         StyledForm, 
@@ -10,8 +11,43 @@ import { GlobalStyle,
     } from "./Styles"
 
 function Stories() {
+
+    const allInputs = {imgUrl: ''}
+    const [imageAsFile, setImageAsFile] = useState('')
+    const [imageAsUrl, setImageAsUrl] = useState(allInputs)  
+    console.log(imageAsFile)
+
     const [state, setState] = useState("");
     const [error, setError] = useState('');
+
+    const handleImageAsFile = (e) =>{
+        const image = e.target.files[0]
+        setImageAsFile(imageFile => (image))
+    }
+
+    const handleFireBaseUpload = (e) =>{
+        e.preventDefault()
+        console.log('start of upload')
+        if(imageAsFile === ''){
+          console.log(`not an image, the image file is a ${typeof(imageAsFile)}`)
+        }
+        const uploadTask = storage.ref(`/images/${imageAsFile.name}`).put(imageAsFile)
+      
+        uploadTask.on('state_changed',
+          (snapShot) => {
+            console.log(snapShot)
+          }, (err) => {
+            console.log(err)
+          }, () => {
+            storage.ref('images').child(imageAsFile.name).getDownloadURL()
+              .then(fireBaseUrl => {
+                setImageAsUrl(prevObject => ({...prevObject, imgUrl: fireBaseUrl}))
+              })
+        
+          }
+        )
+      }
+      
 
 const handleSubmit = ()=>{
     
@@ -24,15 +60,15 @@ const handleInput = ()=>{
       <>
       <GlobalStyle />
         <StyledFormWrapper>
-            <StyledForm onSubmit={handleSubmit}>
+            <StyledForm onSubmit={handleFireBaseUpload}>
             <h2>Share your amazing story!</h2>
             <label htmlFor="image">Upload your picture</label>
             <StyledInput
-                type="image"
+                type="file"
                 name="image"
                 placeholder="Choose Image"
                 value={state.image}
-                onChange={handleInput}
+                onChange={handleImageAsFile}
             />
             <label htmlFor="firstName">First Name</label>
             <StyledInput
